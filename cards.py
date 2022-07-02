@@ -101,18 +101,3 @@ class DeckBuilder:
             for suit in list(Suit):
                 cards.append(TrucoCard(val, suit))
         return Deck(cards)
-
-#if __name__ == "__main__":
-#    card1 = Card(2, 1)
-#    card2 = Card(2, 2)
-#    print(card1 > card2)
-#    print(card1 < card2)
-#    print("---------------------")
-#
-#
-#    deck_builder = DeckBuilder()
-#    deck = deck_builder.build_truco_deck()
-#    deck.show_deck()
-#    print("---------------------")
-#
-#

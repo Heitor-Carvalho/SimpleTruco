@@ -112,20 +112,3 @@ class DummyStretagy:
         else:
             print("No cards avaliable")
 
-
-
-#if __name__ == "__main__":
-#    dummy_strategy = DummyStretagy()
-#    p1 = Player(dummy_strategy)
-#    from game_status import GameStatus
-#    game_status = GameStatus()
-#    print(p1.make_chalange(game_status))
-#    print(p1.handle_chalange(game_status))
-#
-#    from cards import TrucoCard
-#    cards = [TrucoCard(2, 1),
-#             TrucoCard(1, 2),
-#             TrucoCard(3, 2)]
-#    print(p1.handle_cards(cards))
-#    print(p1.play_card(game_status))
-

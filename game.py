@@ -1,73 +1,84 @@
 from view import PrintViewer
+from truco_events import TrucoEvents
 from cards import DeckBuilder, Value
 from game_status import GameStatus, ChalangesAction
 from player import Player, DummyStretagy, UserStretagy, PlayersManager
 
 # TODO Implement other stretagy
-
 class TrucoGame:
 
-    def __init__(self, player_manager, deck_builder, viwer):
+    def __init__(self, player_manager, deck_builder, handlers=[]):
         self.player_manager_ = player_manager
         self.deck_builder_ = deck_builder
         self.deck_ = deck_builder.build_truco_deck()
-        self.viwer_ = viwer
+        self.handlers_ = handlers
         self.game_status_ = GameStatus()
 
     def start(self):
         self.game_status_.add_to_team_a(self.player_manager_.get_current_player())
         self.game_status_.add_to_team_b(self.player_manager_.get_next_player())
 
-        self.viwer_.show_game_status(self.game_status_)
-        self.viwer_.clear_screen(wait=True)
-
+        self._emit_event(TrucoEvents.GAME_STARTED)
         while self._check_game_end() == False:
 
             self._prepare_rounds()
-            self.viwer_.show_round_status(self.player_manager_.get_current_player(), \
-                                          self.game_status_.get_team_a_player(),     \
-                                          self.game_status_.get_team_b_player(),     \
-                                          self.game_status_.get_round_status())
+            self._emit_event(TrucoEvents.ROUND_PREPARED)
 
             while not self._check_round_end():
                 self._truco_session()
-                self.viwer_.show_truco_message(self.game_status_.get_round_status())
+                self._emit_event(TrucoEvents.RAN_TRUCO_SESSION)
 
                 if self._check_round_end():
                     break
 
-                self.viwer_.clear_screen(wait=True)
-                self.viwer_.show_round_status(self.player_manager_.get_current_player(), \
-                                              self.game_status_.get_team_a_player(),     \
-                                              self.game_status_.get_team_b_player(),     \
-                                              self.game_status_.get_round_status())
+                self._emit_event(TrucoEvents.ROUND_STARTED)
 
                 self._play_cards()
                 self.player_manager_.move_next_player()
 
                 self._truco_session()
-                self.viwer_.show_truco_message(self.game_status_.get_round_status())
+                self._emit_event(TrucoEvents.RAN_TRUCO_SESSION)
 
                 self._resolve_round()
-
-                self.viwer_.clear_screen()
-                self.viwer_.show_round_status(self.player_manager_.get_current_player(), \
-                                              self.game_status_.get_team_a_player(),     \
-                                              self.game_status_.get_team_b_player(),     \
-                                              self.game_status_.get_round_status())
+                self._emit_event(TrucoEvents.ROUND_RESOLVED)
 
             self._round_end()
             self.player_manager_.move_next_player()
+            self._emit_event(TrucoEvents.ROUND_ENDED)
 
-            self.viwer_.clear_screen(wait=True)
+        self._emit_event(TrucoEvents.GAME_ENDED)
 
-            self.viwer_.show_round_end(self.game_status_.get_team_a_player(), \
-                                       self.game_status_.get_team_b_player(), \
-                                       self.game_status_.get_round_status())
-            self.viwer_.show_game_status(self.game_status_)
+    def register_event_listener(self, handler):
+        self.handlers_.append(handler)
 
-            self.viwer_.clear_screen(wait=True)
+    def _emit_event(self, event):
+        data = self._get_event_data(event)
+        for handler in self.handlers_:
+            handler.handle_event(event, data)
 
+    def _get_event_data(self, event):
+        data = {}
+        if event == TrucoEvents.GAME_STARTED:
+            data = {"game_status": self.game_status_}
+        elif event == TrucoEvents.RAN_TRUCO_SESSION:
+            data = {"round_status":     self.game_status_.get_round_status()}
+        elif event == TrucoEvents.ROUND_STARTED  or \
+             event == TrucoEvents.ROUND_RESOLVED or \
+             event == TrucoEvents.ROUND_PREPARED:
+            data = {"current_player": self.player_manager_.get_current_player(), \
+                    "player_a":       self.game_status_.get_team_a_player(),     \
+                    "player_b":       self.game_status_.get_team_b_player(),     \
+                    "round_status":   self.game_status_.get_round_status()}
+        elif event == TrucoEvents.ROUND_ENDED:
+            data = {"current_player: ": self.player_manager_.get_current_player(), \
+                    "player_a":         self.game_status_.get_team_a_player(),     \
+                    "player_b":         self.game_status_.get_team_b_player(),     \
+                    "round_status":     self.game_status_.get_round_status(),      \
+                    "game_status":     self.game_status_}
+        elif event == TrucoEvents.GAME_ENDED:
+            data = {"game_status":     self.game_status_}
+
+        return data
 
     def _compare_cards(self, central_card, card1, card2):
         if card1.value_.value == (central_card.value_.value+1 % Value.KING) and\
@@ -157,11 +168,13 @@ class TrucoGame:
 
 if __name__ == "__main__":
 
-    viwer = PrintViewer()
+    viewer = PrintViewer()
     deck_builder = DeckBuilder()
+
     players = [Player(UserStretagy(), "Player 1"), Player(UserStretagy(), "Player 2")]
     player_manager = PlayersManager(players)
 
-    truco_game = TrucoGame(player_manager, deck_builder, viwer)
+    truco_game = TrucoGame(player_manager, deck_builder)
+    truco_game.register_event_listener(viewer)
     truco_game.start()
 

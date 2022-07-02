@@ -3,6 +3,7 @@ import math
 import itertools
 
 from game_status import ChalangesAction
+from truco_events import TrucoEvents
 
 class PrintViewer:
 
@@ -22,7 +23,30 @@ class PrintViewer:
         else:
             print(self.get_left_pad(text) + " " + text + " " + self.get_right_pad(text))
 
-    def show_game_status(self, game_status):
+    def handle_event(self, event, data):
+        if event == TrucoEvents.GAME_STARTED:
+            self._show_game_status(data["game_status"])
+            self._clear_screen(wait=True)
+        elif event == TrucoEvents.ROUND_PREPARED:
+            self._show_round_status(data["current_player"], data["player_a"], data["player_b"], data["round_status"])
+        elif event == TrucoEvents.ROUND_STARTED:
+            self._clear_screen(wait=True)
+            self._show_round_status(data["current_player"], data["player_a"], data["player_b"], data["round_status"])
+        elif event == TrucoEvents.RAN_TRUCO_SESSION:
+            self._show_truco_message(data["round_status"])
+        elif event == TrucoEvents.ROUND_RESOLVED:
+            self._clear_screen()
+            self._show_round_status(data["current_player"], data["player_a"], data["player_b"], data["round_status"])
+        elif event == TrucoEvents.ROUND_ENDED:
+            self._clear_screen(wait=True)
+            self._show_round_end(data["player_a"], data["player_b"], data["round_status"])
+            self._show_game_status(data["game_status"])
+            self._clear_screen(wait=True)
+        elif event == TrucoEvents.GAME_ENDED:
+            self._show_game_status(data["game_status"])
+            self._clear_screen(wait=True)
+
+    def _show_game_status(self, game_status):
         try:
             self.print_pad("Game Score")
             self.print_pad(f"Team {game_status.get_team_a_player().name().ljust(10)} Game Score: {game_status.get_team_a_score()}")
@@ -30,7 +54,7 @@ class PrintViewer:
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
-    def show_round_status(self, current_player, team_a_player, team_b_player, round_status):
+    def _show_round_status(self, current_player, team_a_player, team_b_player, round_status):
         try:
             self.print_pad(f"Round {round_status.get_round_turn()+1} Status")
             self.print_pad(f"Team {team_a_player.name().ljust(10)} Round Score: {round_status.get_team_a_round_score()}")
@@ -55,7 +79,7 @@ class PrintViewer:
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
-    def show_round_end(self, team_a_player, team_b_player, round_status):
+    def _show_round_end(self, team_a_player, team_b_player, round_status):
         try:
             self.print_pad("Round ended:")
             print(f"Cards Played {team_a_player.name()}".ljust(25) + " | "\
@@ -68,7 +92,7 @@ class PrintViewer:
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
-    def show_truco_message(self, round_status):
+    def _show_truco_message(self, round_status):
         try:
             truco_status, player = round_status.get_truco_status()
             if truco_status == ChalangesAction.NO_CHALANGE:
@@ -81,7 +105,7 @@ class PrintViewer:
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
-    def clear_screen(self, wait=False):
+    def _clear_screen(self, wait=False):
         if wait:
             input()
         os.system("clear")
