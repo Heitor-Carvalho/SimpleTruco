@@ -50,6 +50,10 @@ class TrucoCard(Card):
 
     one_two_three = {Value.ONE, Value.TWO, Value.THREE}
 
+    def __eq__(self, other):
+        return self.value_ == other.value_ and \
+               self.suit_ == other.suit_
+
     def __gt__(self, other):
         if self.value_ == other.value_:
             return self.suit_ > other.suit_
@@ -95,7 +99,8 @@ class DeckBuilder:
     def rebuild(self):
         return self.build_truco_deck()
 
-    def build_truco_deck(self):
+    @staticmethod
+    def build_truco_deck():
         cards = []
         for val in list(Value)[0:7] + list(Value)[10:]:
             for suit in list(Suit):
