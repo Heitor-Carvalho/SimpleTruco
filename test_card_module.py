@@ -31,7 +31,7 @@ def test_card_neq():
     assert TrucoCard(Value.THREE, Suit.CLUBS) != TrucoCard(Value.THREE, Suit.HEART)
 
 def test_card_string_representation():
-    assert TrucoCard(Value.THREE, Suit.CLUBS).__str__() == "3-♣"
-    assert TrucoCard(Value.KING, Suit.HEART).__str__() == "K-♥"
-    assert TrucoCard(Value.SEVEN, Suit.SPADES).__str__() == "7-♠"
+    assert TrucoCard(Value.THREE, Suit.CLUBS).__str__()    == "3-♣"
+    assert TrucoCard(Value.KING, Suit.HEART).__str__()     == "K-♥"
+    assert TrucoCard(Value.SEVEN, Suit.SPADES).__str__()   == "7-♠"
     assert TrucoCard(Value.QUEEN, Suit.DIAMONDS).__str__() == "Q-♦"

@@ -40,15 +40,19 @@ class UserStretagy(GameStrategy):
 
 class DummyStretagy(GameStrategy):
 
-    TIME = 0.01
+    TIME = 0.2
+
+    def __init__(self, challenge=False, handle_answer=False):
+        self._challenge = challenge
+        self._handle_answer = handle_answer
 
     def make_challenge(self, name, cards, game_status):
         time.sleep(DummyStretagy.TIME)
-        return False
+        return self._challenge
 
     def handle_challenge(self, name, cards, game_status):
         time.sleep(DummyStretagy.TIME)
-        return True
+        return self._handle_answer
 
     def ask_press(self):
         time.sleep(DummyStretagy.TIME*2)
@@ -56,8 +60,5 @@ class DummyStretagy(GameStrategy):
 
     def play_card(self, name, cards, game_status):
         time.sleep(DummyStretagy.TIME)
-        if len(cards) != 0:
-            return cards.pop()
-        else:
-            print("No cards avaliable")
+        return cards.pop()
 

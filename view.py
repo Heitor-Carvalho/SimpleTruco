@@ -5,7 +5,7 @@ import os
 import math
 import itertools
 
-from game_status import ChalangesAction
+from game_status import TrucoChallengeStatus
 from abc import ABC, abstractmethod
 
 class View(ABC):
@@ -43,7 +43,10 @@ class View(ABC):
         pass
 
     @abstractmethod
-    def show_truco_message(self, round_status):
+    def show_truco_chalange_message(self, round_status):
+        pass
+
+    def show_truco_accept_message(self, round_status):
         pass
 
     @abstractmethod
@@ -53,6 +56,12 @@ class View(ABC):
 class ConsoleView(View):
 
     message_length = 60
+
+    def start(self):
+        pass
+
+    def finish(self):
+        pass
 
     def ask_press(self):
         input()
@@ -166,23 +175,26 @@ class ConsoleView(View):
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
-    def show_truco_message(self, round_status):
+    def show_truco_chalange_message(self, round_status):
         try:
-            truco_status, player = round_status.get_truco_status()
-            if truco_status == ChalangesAction.NO_CHALANGE:
-                self.print_pad(f"No truco by {player}")
-            elif truco_status == ChalangesAction.CHALANGE:
-                self.print_pad(f"Truco by {player}")
-            elif truco_status == ChalangesAction.ACCEPT:
-                self.print_pad(f"Truco Accepted by {player}")
-                self.print_pad(f"New round value: {round_status.get_round_points()}")
-            elif truco_status == ChalangesAction.DENIED:
-                self.print_pad(f"Truco Denied by {player}")
+            truco_status = round_status.get_truco_status()
+            if truco_status.challenge_status:
+                self.print_pad(f"Truco by {truco_status.challenger_player}")
             else:
-                pass
+                self.print_pad(f"No truco by {truco_status.challenger_player}")
         except Exception as e:
             print(f"Message failed: {str(e)}")
 
+    def show_truco_accept_message(self, round_status):
+        try:
+            truco_status = round_status.get_truco_status()
+            if truco_status.challenge_accepted:
+                self.print_pad(f"Truco Accepted by {truco_status.challenged_player}")
+                self.print_pad(f"New round value: {round_status.get_round_points()}")
+            else:
+                self.print_pad(f"Truco Denied by {truco_status.challenged_player}")
+        except Exception as e:
+            print(f"Message failed: {str(e)}")
     def clear_screen(self, wait=False):
         if wait:
             input()
@@ -249,8 +261,11 @@ class ServerView:
     def show_round_end(self, team_a_player, team_b_player, round_status):
         return self._ask_client("show_round_end", (team_a_player, team_b_player, round_status))
 
-    def show_truco_message(self, round_status):
-        return self._ask_client("show_truco_message", (round_status,))
+    def show_truco_chalange_message(self, round_status):
+        return self._ask_client("show_truco_chalange_message", (round_status,))
+
+    def show_truco_accept_message(self, round_status):
+        return self._ask_client("show_truco_accept_message", (round_status,))
 
     def clear_screen(self, wait=False):
         return self._ask_client("clear_screen", (wait,))

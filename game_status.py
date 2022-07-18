@@ -1,18 +1,19 @@
 from enum import Enum
 
-class ChalangesAction(Enum):
-    NO_CHALANGE = 0
-    CHALANGE    = 1
-    DENIED      = 2
-    ACCEPT      = 3
+class TrucoChallengeStatus:
+
+    def __init__(self):
+        self.challenge_status = False
+        self.challenge_accepted = False
+        self.challenger_player = None
+        self.challenged_player = None
 
 class RoundStatus:
 
     ROUND_POINTS = [1, 3, 6, 9, 12]
 
     def __init__(self):
-        self._truco_status = ChalangesAction.NO_CHALANGE
-        self._truco_statuschalanger = None
+        self._truco_status = TrucoChallengeStatus()
         self._winner_player = None
         self._central_card = 0
         self._team_a_round_score_ = 0
@@ -22,12 +23,11 @@ class RoundStatus:
         self._team_a_played_cards = []
         self._team_b_played_cards = []
 
-    def set_truco_status(self, truco_status, player):
+    def set_truco_status(self, truco_status):
         self._truco_status = truco_status
-        self._truco_statuschalanger = player
 
     def get_truco_status(self):
-        return self._truco_status, self._truco_statuschalanger
+        return self._truco_status
 
     def set_round_winner(self, player_name):
         self._winner_player = player_name
@@ -116,7 +116,7 @@ class GameStatus:
         elif player in self.team_b_players_:
             self.round_status_.increment_team_b_round_score()
 
-        self.round_status_.set_round_winner(player.name())
+        self.round_status_.set_round_winner(player)
         self.round_status_.increase_round_turn()
 
     def add_played_card(self, player, card):

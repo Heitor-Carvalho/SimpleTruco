@@ -2,13 +2,6 @@ import random
 from abc import ABC, abstractmethod
 from enum import Enum
 
-class PlayerActions(Enum):
-    NAME            = 0
-    MAKE_CHALANGE   = 1
-    HANDLE_CHALANGE = 2
-    ASK_PRESS       = 3
-    PLAY_CARDS      = 4
-
 class PlayersManager:
 
     def __init__(self, players):
@@ -32,7 +25,7 @@ class PlayersManager:
         index = self._players.index(self._current_player)
         self._current_player = self._players[(index + 1) % len(self._players)]
 
-class Player(ABC):
+class AbstractPlayer(ABC):
 
     @abstractmethod
     def name(self):
@@ -62,7 +55,7 @@ class Player(ABC):
     def play_card(self, game_status):
         pass
 
-class Player(ABC):
+class Player(AbstractPlayer):
 
     def __init__(self, strategy, name):
         self._strategy = strategy

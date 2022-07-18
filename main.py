@@ -2,7 +2,7 @@ from cards import DeckBuilder
 from view import ConsoleView, ServerView
 from game import TrucoGame
 from player import Player, PlayersManager
-from events_handlers import ConsoleViewController
+from events_handlers import ConsoleViewDisplay
 from game_strategies import DummyStretagy, UserStretagy
 
 # TODO Implement other strategy
@@ -14,12 +14,15 @@ from game_strategies import DummyStretagy, UserStretagy
 if __name__ == "__main__":
     deck_builder = DeckBuilder()
 
-    view = ServerView("127.0.0.1", 4022)
+    #view = ServerView("127.0.0.1", 4022)
+    view = ConsoleView()
     view.start()
     console_view_control = ConsoleViewDisplay(view)
 
-    l1_user_strategy = UserStretagy(view)
+    #l1_user_strategy = UserStretagy(view)
+    l1_user_strategy = DummyStretagy()
     l2_user_strategy = DummyStretagy()
+    #l2_user_strategy = UserStretagy(view)
 
     l1_player = Player(l1_user_strategy, "Player 1")
     l2_player = Player(l2_user_strategy, "Player 2")
